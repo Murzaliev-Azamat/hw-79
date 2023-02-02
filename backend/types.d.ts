@@ -12,7 +12,7 @@ export interface Place {
   description: string;
 }
 
-export type PlaceWithoutId = Omit<Category, 'id'>;
+export type PlaceWithoutId = Omit<Place, 'id'>;
 
 export interface Item {
   id: number;
@@ -23,4 +23,4 @@ export interface Item {
   photo: string | null;
 }
 
-export type ItemWithoutId = Omit<Category, 'id', 'category_id', 'place_id'>;
+export type ItemWithoutId = Omit<Item, 'id'>;

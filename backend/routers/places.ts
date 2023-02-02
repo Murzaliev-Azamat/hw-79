@@ -2,6 +2,7 @@ import express from 'express';
 import {Place, PlaceWithoutId} from "../types";
 import mysqlDb from "../mysqlDB";
 import {OkPacket} from "mysql2";
+import categoriesRouter from "./categories";
 
 const placesRouter = express.Router();
 
@@ -56,6 +57,13 @@ placesRouter.post('', async (req, res) => {
     ...placeData,
     id: info.insertId,
   });
+});
+
+placesRouter.delete('/:id', async (req, res) => {
+  const connection = mysqlDb.getConnection();
+  const result = await connection.query('DELETE FROM places WHERE id = ?', req.params.id);
+
+  res.send("Deleted");
 });
 
 

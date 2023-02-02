@@ -1,65 +1,75 @@
 import express from 'express';
-import {Category, CategoryWithoutId, ItemWithoutId} from "../types";
+import {Category, CategoryWithoutId, Item, ItemWithoutId} from "../types";
 import {imagesUpload} from "../multer";
 import mysqlDb from "../mysqlDB";
-import {OkPacket} from "mysql2/index";
+import {OkPacket} from "mysql2";
 import categoriesRouter from "./categories";
+import placesRouter from "./places";
 
 const itemsRouter = express.Router();
 
-// categoriesRouter.get('', async (req, res) => {
-//   const connection = mysqlDb.getConnection();
-//   const result = await connection.query('SELECT id, name FROM categories');
-//   const categories = result[0] as Category[];
-//
-//   res.send(categories);
-// });
-//
-// categoriesRouter.get('/:id', async (req, res) => {
-//   const connection = mysqlDb.getConnection();
-//   const result = await connection.query(
-//     'SELECT * FROM categories WHERE id = ?',
-//     [req.params.id]
-//   );
-//   const categories = result[0] as Category[];
-//   const category = categories[0];
-//
-//   if(!category) {
-//     return res.status(404).send({error: 'Not Found'});
-//   }
-//
-//   res.send(category);
-// });
-//
-// // categoriesRouter.post('', imagesUpload.single('image'), async (req, res) => {
-// categoriesRouter.post('', async (req, res) => {
-//   if (!req.body.name) {
-//     return res.status(400).send({error: 'Поле сообщение отсутствует'});
-//   }
-//
-//   const categoryData: CategoryWithoutId = {
-//     name: req.body.name,
-//     description: req.body.description,
-//     // image: req.file ? req.file.filename : null,
-//   };
-//
-//   const connection = mysqlDb.getConnection();
-//
-//   const sql = connection.format(
-//     'INSERT INTO categories (name, description) VALUES (?, ?)',
-//     [categoryData.name, categoryData.description]
-//   );
-//
-//   console.log(sql)
-//
-//   const result = await connection.query(sql);
-//
-//   const info = result[0] as OkPacket;
-//
-//   res.send({
-//     ...categoryData,
-//     id: info.insertId,
-//   });
-// });
+itemsRouter.get('', async (req, res) => {
+  const connection = mysqlDb.getConnection();
+  const result = await connection.query('SELECT id, name, category_id, place_id FROM items');
+  const items = result[0] as Item[];
+
+  res.send(items);
+});
+
+itemsRouter.get('/:id', async (req, res) => {
+  const connection = mysqlDb.getConnection();
+  const result = await connection.query(
+    'SELECT * FROM items WHERE id = ?',
+    [req.params.id]
+  );
+  const items = result[0] as Item[];
+  const item = items[0];
+
+  if(!item) {
+    return res.status(404).send({error: 'Not Found'});
+  }
+
+  res.send(item);
+});
+
+
+itemsRouter.post('', imagesUpload.single('photo'), async (req, res) => {
+  if (!req.body.name || !req.body.category_id || !req.body.place_id ) {
+    return res.status(400).send({error: 'Поле сообщение отсутствует'});
+  }
+
+  const itemData: ItemWithoutId = {
+    name: req.body.name,
+    description: req.body.description,
+    photo: req.file ? req.file.filename : null,
+    category_id: req.body.category_id,
+    place_id: req.body.place_id,
+  };
+
+  const connection = mysqlDb.getConnection();
+
+  const sql = connection.format(
+    'INSERT INTO items (name, description, photo, category_id, place_id) VALUES (?, ?, ?, ?, ?)',
+    [itemData.name, itemData.description, itemData.photo, itemData.category_id, itemData.place_id]
+  );
+
+  console.log(sql)
+
+  const result = await connection.query(sql);
+
+  const info = result[0] as OkPacket;
+
+  res.send({
+    ...itemData,
+    id: info.insertId,
+  });
+});
+
+itemsRouter.delete('/:id', async (req, res) => {
+  const connection = mysqlDb.getConnection();
+  const result = await connection.query('DELETE FROM items WHERE id = ?', req.params.id);
+
+  res.send("Deleted");
+});
 
 export default itemsRouter;

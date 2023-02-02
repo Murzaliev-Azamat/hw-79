@@ -9,7 +9,7 @@ const config = {
     host:'localhost',
     user: 'root',
     password: 'root',
-    database: 'hw-79'
+    database: 'azamat_hw_79'
   }
 };
 

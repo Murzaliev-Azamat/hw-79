@@ -1,5 +1,5 @@
 import express from 'express';
-import {Place, PlaceWithoutId} from "../types";
+import {existPlaceID, Place, PlaceWithoutId} from "../types";
 import mysqlDb from "../mysqlDB";
 import {OkPacket} from "mysql2";
 import categoriesRouter from "./categories";
@@ -61,6 +61,17 @@ placesRouter.post('', async (req, res) => {
 
 placesRouter.delete('/:id', async (req, res) => {
   const connection = mysqlDb.getConnection();
+
+  const resultPlaceIdsInItems = await connection.query('SELECT place_id FROM items');
+  const placeIdsInItems = resultPlaceIdsInItems[0] as existPlaceID[];
+  for (const placeIdInItems of placeIdsInItems) {
+    const everyID = placeIdInItems.place_id;
+    if(everyID === Number(req.params.id)) {
+      res.send("Данную категорию нельзя удалить, так как она связана с ресурсом item");
+      return
+    }
+  }
+
   const result = await connection.query('DELETE FROM places WHERE id = ?', req.params.id);
 
   res.send("Deleted");

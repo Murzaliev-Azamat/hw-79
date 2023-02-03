@@ -1,5 +1,5 @@
 import express from 'express';
-import {Category, CategoryWithoutId} from "../types";
+import {Category, CategoryWithoutId, existCategoryID} from "../types";
 import {imagesUpload} from "../multer";
 import mysqlDb from "../mysqlDB";
 import {OkPacket} from "mysql2";
@@ -49,8 +49,6 @@ categoriesRouter.post('', async (req, res) => {
     [categoryData.name, categoryData.description]
   );
 
-  console.log(sql)
-
   const result = await connection.query(sql);
 
   const info = result[0] as OkPacket;
@@ -63,6 +61,17 @@ categoriesRouter.post('', async (req, res) => {
 
 categoriesRouter.delete('/:id', async (req, res) => {
   const connection = mysqlDb.getConnection();
+
+  const resultCategoryIdsInItems = await connection.query('SELECT category_id FROM items');
+  const categoryIdsInItems = resultCategoryIdsInItems[0] as existCategoryID[];
+  for (const categoryIdInItems of categoryIdsInItems) {
+    const everyID = categoryIdInItems.category_id;
+    if(everyID === Number(req.params.id)) {
+      res.send("Данную категорию нельзя удалить, так как она связана с ресурсом item");
+      return
+    }
+  }
+
   const result = await connection.query('DELETE FROM categories WHERE id = ?', req.params.id);
 
   res.send("Deleted");

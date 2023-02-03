@@ -24,3 +24,10 @@ export interface Item {
 }
 
 export type ItemWithoutId = Omit<Item, 'id'>;
+
+export interface existCategoryID {
+  category_id: number;
+}
+export interface existPlaceID {
+  place_id: number;
+}

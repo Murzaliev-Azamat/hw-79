@@ -1,6 +1,5 @@
 import cors from 'cors';
 import express from 'express';
-// import fileDb from "./fileDb";
 import categoriesRouter from "./routers/categories";
 import mysqlDb from "./mysqlDB";
 import placesRouter from "./routers/places";
@@ -18,7 +17,6 @@ app.use('/items', itemsRouter);
 
 const run = async () => {
   await mysqlDb.init();
-  // await fileDb.init();
 
   app.listen(port, () => {
     console.log('We are live on ' + port);

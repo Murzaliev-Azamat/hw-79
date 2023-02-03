@@ -1,10 +1,8 @@
 import express from 'express';
-import {Category, CategoryWithoutId, Item, ItemWithoutId} from "../types";
+import {Item, ItemWithoutId} from "../types";
 import {imagesUpload} from "../multer";
 import mysqlDb from "../mysqlDB";
 import {OkPacket} from "mysql2";
-import categoriesRouter from "./categories";
-import placesRouter from "./places";
 
 const itemsRouter = express.Router();
 
@@ -25,7 +23,7 @@ itemsRouter.get('/:id', async (req, res) => {
   const items = result[0] as Item[];
   const item = items[0];
 
-  if(!item) {
+  if (!item) {
     return res.status(404).send({error: 'Not Found'});
   }
 
@@ -34,7 +32,7 @@ itemsRouter.get('/:id', async (req, res) => {
 
 
 itemsRouter.post('', imagesUpload.single('photo'), async (req, res) => {
-  if (!req.body.name || !req.body.category_id || !req.body.place_id ) {
+  if (!req.body.name || !req.body.category_id || !req.body.place_id) {
     return res.status(400).send({error: 'Поле сообщение отсутствует'});
   }
 
@@ -53,8 +51,6 @@ itemsRouter.post('', imagesUpload.single('photo'), async (req, res) => {
     [itemData.name, itemData.description, itemData.photo, itemData.category_id, itemData.place_id]
   );
 
-  console.log(sql)
-
   const result = await connection.query(sql);
 
   const info = result[0] as OkPacket;
@@ -67,7 +63,7 @@ itemsRouter.post('', imagesUpload.single('photo'), async (req, res) => {
 
 itemsRouter.delete('/:id', async (req, res) => {
   const connection = mysqlDb.getConnection();
-  const result = await connection.query('DELETE FROM items WHERE id = ?', req.params.id);
+  await connection.query('DELETE FROM items WHERE id = ?', req.params.id);
 
   res.send("Deleted");
 });

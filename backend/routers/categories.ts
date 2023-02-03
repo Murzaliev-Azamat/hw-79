@@ -1,6 +1,5 @@
 import express from 'express';
 import {Category, CategoryWithoutId, existCategoryID} from "../types";
-import {imagesUpload} from "../multer";
 import mysqlDb from "../mysqlDB";
 import {OkPacket} from "mysql2";
 
@@ -23,14 +22,13 @@ categoriesRouter.get('/:id', async (req, res) => {
   const categories = result[0] as Category[];
   const category = categories[0];
 
-  if(!category) {
+  if (!category) {
     return res.status(404).send({error: 'Not Found'});
   }
 
   res.send(category);
 });
 
-// categoriesRouter.post('', imagesUpload.single('image'), async (req, res) => {
 categoriesRouter.post('', async (req, res) => {
   if (!req.body.name) {
     return res.status(400).send({error: 'Поле сообщение отсутствует'});
@@ -39,7 +37,6 @@ categoriesRouter.post('', async (req, res) => {
   const categoryData: CategoryWithoutId = {
     name: req.body.name,
     description: req.body.description,
-    // image: req.file ? req.file.filename : null,
   };
 
   const connection = mysqlDb.getConnection();
@@ -66,18 +63,16 @@ categoriesRouter.delete('/:id', async (req, res) => {
   const categoryIdsInItems = resultCategoryIdsInItems[0] as existCategoryID[];
   for (const categoryIdInItems of categoryIdsInItems) {
     const everyID = categoryIdInItems.category_id;
-    if(everyID === Number(req.params.id)) {
+    if (everyID === Number(req.params.id)) {
       res.send("Данную категорию нельзя удалить, так как она связана с ресурсом item");
       return
     }
   }
 
-  const result = await connection.query('DELETE FROM categories WHERE id = ?', req.params.id);
+  await connection.query('DELETE FROM categories WHERE id = ?', req.params.id);
 
   res.send("Deleted");
 });
-
-
 
 
 export default categoriesRouter;
